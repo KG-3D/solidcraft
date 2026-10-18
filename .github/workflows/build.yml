@@ -3,35 +3,26 @@ name: Build SolidCraft
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-  workflow_dispatch: # Permite disparar a compilação manualmente
+  workflow_dispatch:
 
 jobs:
   build-windows:
-    name: Build Windows (MSVC)
     runs-on: windows-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Setup MSBuild and CMake
-        uses: lukka/get-cmake@latest
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
 
-      - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build
-        run: cmake --build build --config Release --parallel
+      - name: Build Release
+        run: cargo build --release
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: solidcraft-windows
-          path: |
-            build/Release/*
-            build/*.exe
-          if-no-files-found: warn
+          path: target/release/*.exe
